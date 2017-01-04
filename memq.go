@@ -23,20 +23,25 @@ type memqMsg struct {
 	value interface{}
 }
 
-// 这个包装，为了在memq.go中打印消息md5，方便查错
-func NewMemqMsg(v interface{}) (*memqMsg, error) {
+// msg在程序中流转的过程中，最好有一个标记，这里用md5
+func newMemqMsg(v interface{}) (*memqMsg, error) {
 	m := &memqMsg{value: v}
+
 	if err := m.setMd5(); err != nil {
 		return nil, err
 	}
+
 	return m, nil
 }
 
+// msg的value一定是原始值
 func (m *memqMsg) setMd5() error {
 	b, err := json.Marshal(m.value)
 	if err != nil {
+		logger.Errorf("setMd5 err. %s", err.Error())
 		return err
 	}
+
 	m.md5 = genMd5(b)
 	return nil
 }
@@ -109,6 +114,22 @@ func (q *memq) stat() *MemqStat {
 	q.memqStat.LenQueue = len(q.queue)
 
 	return q.memqStat
+}
+
+func newMemq(createPdr func() (Producer, error), pdrc, cc, bufferSize int) *memq {
+	m := &memq{
+		pdrs: list.New(),
+
+		createPdr: createPdr,
+		pdrc:      pdrc,
+		cc:        cc,
+		queue:     make(chan *memqMsg, bufferSize),
+
+		sendTimeout: 1 * time.Second,
+		memqStat:    &MemqStat{},
+	}
+	m.init()
+	return m
 }
 
 func (q *memq) init() error {

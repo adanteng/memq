@@ -40,11 +40,6 @@ func NewRabbitmqPdrFactory(amqpUri, exchange, bindingKey, queue string) *rabbitm
 	}
 }
 
-// TODO(lihao3) 这么设计的话，对redis或者rabbitmq的开发，需要memq自己封装，插件化会导致可能出现冲突，但不影响freeman的使用
-func (factory *rabbitmqPdrFactory) GetName() string {
-	return fmt.Sprintf("rabbitmq-%s-%s-%s", factory.exchange, factory.bindingKey, factory.queue)
-}
-
 // 初始化一个rabbitmq的channel对象
 func (factory *rabbitmqPdrFactory) Create() (Producer, error) {
 	s := rabbitmqPdr{

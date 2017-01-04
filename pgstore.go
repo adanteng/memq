@@ -84,6 +84,7 @@ func (s *PGStore) reset(messageID string) error {
 // must not tx
 func (s *PGStore) Finish(messageID string) error {
 	if _, err := s.db.Exec("update plsv2.pls_message set status=1, updatetime=$1 where message_id=$2", time.Now().Unix(), messageID); err != nil {
+		logger.Errorf("Finish err. %s %s", messageID, err.Error())
 		return err
 	}
 	return nil
@@ -92,6 +93,7 @@ func (s *PGStore) Finish(messageID string) error {
 // must not tx
 func (s *PGStore) Fail(messageID string) error {
 	if _, err := s.db.Exec("update plsv2.pls_message set status=2, updatetime=$1 where message_id=$2 and status=0", time.Now().Unix(), messageID); err != nil {
+		logger.Errorf("Fail err. %s %s", messageID, err.Error())
 		return err
 	}
 	return nil

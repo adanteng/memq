@@ -1,3 +1,4 @@
+```
 CREATE TABLE plsv2.pls_message (
   message_id bigserial NOT NULL,
   message_md5 char(32) NOT NULL DEFAULT '',
@@ -11,3 +12,4 @@ CREATE TABLE plsv2.pls_message (
 ALTER TABLE ONLY plsv2.pls_message ADD CONSTRAINT pls_message_pkey PRIMARY KEY (message_id);
 
 CREATE UNIQUE INDEX uq_message_md5 ON pls_message USING btree (message_md5);
+```
