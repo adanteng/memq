@@ -20,7 +20,6 @@ var (
 type supervisor struct {
 	mu sync.Mutex
 
-	//
 	store      Store
 	transports map[string]*Transport
 
@@ -46,8 +45,20 @@ func startSupervisor() {
 	supervisorMu.Lock()
 	defer supervisorMu.Unlock()
 
+	// inter process lock
 	if started {
 		return
+	}
+
+	// global lock
+
+	for {
+		// 尝试获取锁，当前使用的pg，如果获取不到，会一直尝试，防止出现单点
+		if lerr := defaultGlobalLock.Lock(); lerr == nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	defaultSupervisor = &supervisor{
@@ -74,6 +85,12 @@ func startSupervisor() {
 	}()
 
 	started = true
+}
+
+// memq global close
+func Close() {
+	// FIXME(lihao3) pg事务，切断连接可能会自动commit，不需要主动commit
+	defaultGlobalLock.Unlock()
 }
 
 func (m *supervisor) transport(qname string) (*Transport, error) {

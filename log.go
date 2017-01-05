@@ -8,7 +8,7 @@ import (
 var logger memqLogger
 
 var infoStd = log.New(os.Stdout, "info ", log.LstdFlags)
-var errStd = log.New(os.Stderr, "err ", log.LstdFlags)
+var errStd = log.New(os.Stderr, "erro ", log.LstdFlags)
 
 type memqLogger struct{}
 
